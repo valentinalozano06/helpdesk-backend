@@ -1,0 +1,29 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: helpdesk_api_test
+      POSTGRES_USER: api_test
+      POSTGRES_PASSWORD: api_test_only
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U api_test -d helpdesk_api_test"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  tests:
+    image: maven:3.9-eclipse-temurin-21
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+      - api-maven-cache:/root/.m2
+    environment:
+      HELPDESK_API_TESTS: 'true'
+      DB_HOST: postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["mvn", "-B", "test"]
+volumes:
+  api-maven-cache:

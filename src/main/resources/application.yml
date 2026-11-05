@@ -1,0 +1,66 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: helpdesk-morales
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:helpdesk_morales}
+    username: ${DB_USER:helpdesk_app}
+    password: ${DB_PASSWORD:changeme}
+    driver-class-name: org.postgresql.Driver
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:db/flow_migration.sql
+      continue-on-error: false
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        default_schema: public
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:helpdesk.morales@example.com}
+    password: ${MAIL_PASSWORD:changeme}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:cambia-esta-clave-en-produccion-minimo-32-caracteres-largos}
+    expiration-ms: ${JWT_EXPIRATION_MS:28800000} # 8 horas
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:4200}
+  notifications:
+    email-enabled: ${NOTIFY_EMAIL_ENABLED:true}
+    remitente: ${NOTIFY_FROM:helpdesk.morales@example.com}
+  ai:
+    # Componente inteligente (CE0234): clasificador de tickets.
+    # Si no hay api-key configurada, el sistema usa automaticamente
+    # el clasificador basado en reglas (fallback), sin romper el flujo.
+    provider-url: ${AI_PROVIDER_URL:https://api.openai.com/v1/chat/completions}
+    api-key: ${AI_API_KEY:}
+    model: ${AI_MODEL:gpt-4o-mini}
+    enabled: ${AI_ENABLED:false}
+
+logging:
+  level:
+    root: INFO
+    com.morales.helpdesk: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/helpdesk.log
+
+springdoc:
+  swagger-ui:
+    path: /docs

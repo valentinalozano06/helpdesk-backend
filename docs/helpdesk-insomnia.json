@@ -1,0 +1,1291 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2026-10-03T21:04:23.487400+00:00",
+  "__export_source": "helpdesk-api",
+  "resources": [
+    {
+      "_id": "__WORKSPACE_ID__",
+      "_type": "workspace",
+      "parentId": null,
+      "name": "Helpdesk Morales API",
+      "description": "API completa. Completar credenciales en Local. Seguir docs/API.md. No ejecutar toda la colección contra datos reales.",
+      "scope": "collection"
+    },
+    {
+      "_id": "__BASE_ENVIRONMENT_ID__",
+      "_type": "environment",
+      "parentId": "__WORKSPACE_ID__",
+      "name": "Base Environment",
+      "data": {}
+    },
+    {
+      "_id": "__env_local__",
+      "_type": "environment",
+      "parentId": "__BASE_ENVIRONMENT_ID__",
+      "name": "Local",
+      "data": {
+        "base_url": "http://localhost:8080/api",
+        "usuario_id": 0,
+        "ticket_id": 0,
+        "tecnico_id": 0,
+        "notificacion_id": 0,
+        "area_id": 0,
+        "categoria_id": 0,
+        "prioridad_id": 0,
+        "estado_id": 0,
+        "usuario_email_prueba": "insomnia.prueba@example.test",
+        "usuario_password_prueba": "",
+        "confirmar_eliminacion": false,
+        "email_admin": "",
+        "password_admin": "",
+        "token_admin": "",
+        "email_jefatura": "",
+        "password_jefatura": "",
+        "token_jefatura": "",
+        "email_tecnico": "",
+        "password_tecnico": "",
+        "token_tecnico": "",
+        "email_solicitante": "",
+        "password_solicitante": "",
+        "token_solicitante": ""
+      }
+    },
+    {
+      "_id": "__folder_auth__",
+      "_type": "request_group",
+      "parentId": "__WORKSPACE_ID__",
+      "name": "01 · Autenticación",
+      "description": "Los tokens se guardan por rol; no se reemplazan entre sí.",
+      "environment": {},
+      "metaSortKey": 3
+    },
+    {
+      "_id": "__request_1__",
+      "_type": "request",
+      "parentId": "__folder_auth__",
+      "name": "Login admin",
+      "method": "POST",
+      "url": "{{ _.base_url }}/auth/login",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"{{ _.email_admin }}\",\n  \"password\": \"{{ _.password_admin }}\"\n}"
+      },
+      "description": "Introduce las credenciales actuales de una cuenta activa del rol indicado. Token, tipo, usuarioId, nombreCompleto, rol y expiraEnMs.\nRespuesta esperada: HTTP 200.",
+      "metaSortKey": 0,
+      "preRequestScript": "insomnia.environment.set('token_admin', '');\nif (!insomnia.environment.get('email_admin') || !insomnia.environment.get('password_admin')) throw new Error('Completa email_admin y password_admin en Local');",
+      "afterResponseScript": "insomnia.test('HTTP 200', () => insomnia.expect(insomnia.response.code).to.eql(200));\nif (insomnia.response.code === 200) {\n  const data = insomnia.response.json();\n  if (data.rol !== 'rol_admin') throw new Error('Esta cuenta no pertenece al rol admin; revisa sus credenciales');\n  insomnia.environment.set(\"token_admin\", data.token);\n}\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    },
+    {
+      "_id": "__request_2__",
+      "_type": "request",
+      "parentId": "__folder_auth__",
+      "name": "Login jefatura",
+      "method": "POST",
+      "url": "{{ _.base_url }}/auth/login",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"{{ _.email_jefatura }}\",\n  \"password\": \"{{ _.password_jefatura }}\"\n}"
+      },
+      "description": "Introduce las credenciales actuales de una cuenta activa del rol indicado. Token, tipo, usuarioId, nombreCompleto, rol y expiraEnMs.\nRespuesta esperada: HTTP 200.",
+      "metaSortKey": 1,
+      "preRequestScript": "insomnia.environment.set('token_jefatura', '');\nif (!insomnia.environment.get('email_jefatura') || !insomnia.environment.get('password_jefatura')) throw new Error('Completa email_jefatura y password_jefatura en Local');",
+      "afterResponseScript": "insomnia.test('HTTP 200', () => insomnia.expect(insomnia.response.code).to.eql(200));\nif (insomnia.response.code === 200) {\n  const data = insomnia.response.json();\n  if (data.rol !== 'rol_jefatura') throw new Error('Esta cuenta no pertenece al rol jefatura; revisa sus credenciales');\n  insomnia.environment.set(\"token_jefatura\", data.token);\n}\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    },
+    {
+      "_id": "__request_3__",
+      "_type": "request",
+      "parentId": "__folder_auth__",
+      "name": "Login tecnico",
+      "method": "POST",
+      "url": "{{ _.base_url }}/auth/login",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"{{ _.email_tecnico }}\",\n  \"password\": \"{{ _.password_tecnico }}\"\n}"
+      },
+      "description": "Introduce las credenciales actuales de una cuenta activa del rol indicado. Token, tipo, usuarioId, nombreCompleto, rol y expiraEnMs.\nRespuesta esperada: HTTP 200.",
+      "metaSortKey": 2,
+      "preRequestScript": "insomnia.environment.set('token_tecnico', '');\nif (!insomnia.environment.get('email_tecnico') || !insomnia.environment.get('password_tecnico')) throw new Error('Completa email_tecnico y password_tecnico en Local');",
+      "afterResponseScript": "insomnia.test('HTTP 200', () => insomnia.expect(insomnia.response.code).to.eql(200));\nif (insomnia.response.code === 200) {\n  const data = insomnia.response.json();\n  if (data.rol !== 'rol_tecnico') throw new Error('Esta cuenta no pertenece al rol tecnico; revisa sus credenciales');\n  insomnia.environment.set(\"token_tecnico\", data.token);\n  insomnia.environment.set(\"tecnico_id\", data.usuarioId);\n}\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    },
+    {
+      "_id": "__request_4__",
+      "_type": "request",
+      "parentId": "__folder_auth__",
+      "name": "Login solicitante",
+      "method": "POST",
+      "url": "{{ _.base_url }}/auth/login",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"{{ _.email_solicitante }}\",\n  \"password\": \"{{ _.password_solicitante }}\"\n}"
+      },
+      "description": "Introduce las credenciales actuales de una cuenta activa del rol indicado. Token, tipo, usuarioId, nombreCompleto, rol y expiraEnMs.\nRespuesta esperada: HTTP 200.",
+      "metaSortKey": 3,
+      "preRequestScript": "insomnia.environment.set('token_solicitante', '');\nif (!insomnia.environment.get('email_solicitante') || !insomnia.environment.get('password_solicitante')) throw new Error('Completa email_solicitante y password_solicitante en Local');",
+      "afterResponseScript": "insomnia.test('HTTP 200', () => insomnia.expect(insomnia.response.code).to.eql(200));\nif (insomnia.response.code === 200) {\n  const data = insomnia.response.json();\n  if (data.rol !== 'rol_solicitante') throw new Error('Esta cuenta no pertenece al rol solicitante; revisa sus credenciales');\n  insomnia.environment.set(\"token_solicitante\", data.token);\n}\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    },
+    {
+      "_id": "__folder_catalogs__",
+      "_type": "request_group",
+      "parentId": "__WORKSPACE_ID__",
+      "name": "02 · Catálogos",
+      "description": "",
+      "environment": {},
+      "metaSortKey": 8
+    },
+    {
+      "_id": "__request_5__",
+      "_type": "request",
+      "parentId": "__folder_catalogs__",
+      "name": "Consultar areas",
+      "method": "GET",
+      "url": "{{ _.base_url }}/catalogos/areas",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_solicitante }}"
+      },
+      "body": {},
+      "description": "Lista de {id, nombre}. Guarda un ID válido en Local; puedes cambiarlo según la prueba.\nRespuesta esperada: HTTP 200.",
+      "metaSortKey": 4,
+      "preRequestScript": "if (!insomnia.environment.get('token_solicitante')) throw new Error('Ejecuta primero Login solicitante en el entorno Local');\n",
+      "afterResponseScript": "insomnia.test('HTTP 200', () => insomnia.expect(insomnia.response.code).to.eql(200));\nif (insomnia.response.code === 200) {\n  const data = insomnia.response.json();\n  insomnia.environment.set(\"area_id\", data[0]?.id || 0);\n}\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    },
+    {
+      "_id": "__request_6__",
+      "_type": "request",
+      "parentId": "__folder_catalogs__",
+      "name": "Consultar categorias",
+      "method": "GET",
+      "url": "{{ _.base_url }}/catalogos/categorias",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_solicitante }}"
+      },
+      "body": {},
+      "description": "Lista de {id, nombre}. Guarda un ID válido en Local; puedes cambiarlo según la prueba.\nRespuesta esperada: HTTP 200.",
+      "metaSortKey": 5,
+      "preRequestScript": "if (!insomnia.environment.get('token_solicitante')) throw new Error('Ejecuta primero Login solicitante en el entorno Local');\n",
+      "afterResponseScript": "insomnia.test('HTTP 200', () => insomnia.expect(insomnia.response.code).to.eql(200));\nif (insomnia.response.code === 200) {\n  const data = insomnia.response.json();\n  insomnia.environment.set(\"categoria_id\", data[0]?.id || 0);\n}\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    },
+    {
+      "_id": "__request_7__",
+      "_type": "request",
+      "parentId": "__folder_catalogs__",
+      "name": "Consultar prioridades",
+      "method": "GET",
+      "url": "{{ _.base_url }}/catalogos/prioridades",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_solicitante }}"
+      },
+      "body": {},
+      "description": "Lista de {id, nombre}. Guarda un ID válido en Local; puedes cambiarlo según la prueba.\nRespuesta esperada: HTTP 200.",
+      "metaSortKey": 6,
+      "preRequestScript": "if (!insomnia.environment.get('token_solicitante')) throw new Error('Ejecuta primero Login solicitante en el entorno Local');\n",
+      "afterResponseScript": "insomnia.test('HTTP 200', () => insomnia.expect(insomnia.response.code).to.eql(200));\nif (insomnia.response.code === 200) {\n  const data = insomnia.response.json();\n  insomnia.environment.set(\"prioridad_id\", (data.find(x => x.nombre === 'alta') || data[0])?.id || 0);\n}\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    },
+    {
+      "_id": "__request_8__",
+      "_type": "request",
+      "parentId": "__folder_catalogs__",
+      "name": "Consultar estados",
+      "method": "GET",
+      "url": "{{ _.base_url }}/catalogos/estados",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_solicitante }}"
+      },
+      "body": {},
+      "description": "Lista de {id, nombre}. Guarda un ID válido en Local; puedes cambiarlo según la prueba.\nRespuesta esperada: HTTP 200.",
+      "metaSortKey": 7,
+      "preRequestScript": "if (!insomnia.environment.get('token_solicitante')) throw new Error('Ejecuta primero Login solicitante en el entorno Local');\n",
+      "afterResponseScript": "insomnia.test('HTTP 200', () => insomnia.expect(insomnia.response.code).to.eql(200));\nif (insomnia.response.code === 200) {\n  const data = insomnia.response.json();\n  insomnia.environment.set(\"estado_id\", (data.find(x => x.nombre === 'en_progreso') || data[0])?.id || 0);\n}\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    },
+    {
+      "_id": "__folder_users__",
+      "_type": "request_group",
+      "parentId": "__WORKSPACE_ID__",
+      "name": "03 · Usuarios",
+      "description": "Solo ADMIN modifica; JEFATURA puede consultar. Usar la cuenta ficticia creada aquí.",
+      "environment": {},
+      "metaSortKey": 13
+    },
+    {
+      "_id": "__request_9__",
+      "_type": "request",
+      "parentId": "__folder_users__",
+      "name": "Listar usuarios · admin",
+      "method": "GET",
+      "url": "{{ _.base_url }}/usuarios",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_admin }}"
+      },
+      "body": {},
+      "description": "\nRespuesta esperada: HTTP 200.",
+      "metaSortKey": 8,
+      "preRequestScript": "if (!insomnia.environment.get('token_admin')) throw new Error('Ejecuta primero Login admin en el entorno Local');\n",
+      "afterResponseScript": "insomnia.test('HTTP 200', () => insomnia.expect(insomnia.response.code).to.eql(200));\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    },
+    {
+      "_id": "__request_10__",
+      "_type": "request",
+      "parentId": "__folder_users__",
+      "name": "Listar usuarios · jefatura",
+      "method": "GET",
+      "url": "{{ _.base_url }}/usuarios",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_jefatura }}"
+      },
+      "body": {},
+      "description": "\nRespuesta esperada: HTTP 200.",
+      "metaSortKey": 9,
+      "preRequestScript": "if (!insomnia.environment.get('token_jefatura')) throw new Error('Ejecuta primero Login jefatura en el entorno Local');\n",
+      "afterResponseScript": "insomnia.test('HTTP 200', () => insomnia.expect(insomnia.response.code).to.eql(200));\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    },
+    {
+      "_id": "__request_11__",
+      "_type": "request",
+      "parentId": "__folder_users__",
+      "name": "Técnicos activos",
+      "method": "GET",
+      "url": "{{ _.base_url }}/usuarios/tecnicos",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_admin }}"
+      },
+      "body": {},
+      "description": "Elige un técnico activo. La variable también se guarda al iniciar sesión como técnico; debe coincidir con la cuenta usada en las pruebas de atención.\nRespuesta esperada: HTTP 200.",
+      "metaSortKey": 10,
+      "preRequestScript": "if (!insomnia.environment.get('token_admin')) throw new Error('Ejecuta primero Login admin en el entorno Local');\n",
+      "afterResponseScript": "insomnia.test('HTTP 200', () => insomnia.expect(insomnia.response.code).to.eql(200));\nif (insomnia.response.code === 200) {\n  const data = insomnia.response.json();\n  insomnia.environment.set(\"tecnico_id\", data[0]?.id || 0);\n}\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    },
+    {
+      "_id": "__request_12__",
+      "_type": "request",
+      "parentId": "__folder_users__",
+      "name": "Crear usuario de prueba",
+      "method": "POST",
+      "url": "{{ _.base_url }}/usuarios",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_admin }}"
+      },
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nombres\": \"Usuario\",\n  \"apellidos\": \"Prueba Insomnia\",\n  \"email\": \"{{ _.usuario_email_prueba }}\",\n  \"password\": \"{{ _.usuario_password_prueba }}\",\n  \"rol\": \"rol_solicitante\",\n  \"areaId\": {{ _.area_id }}\n}"
+      },
+      "description": "Cuenta activa por defecto. Rol: rol_admin, rol_jefatura, rol_tecnico o rol_solicitante. Contraseña mínima 6 caracteres. No devuelve token ni hash.\nRespuesta esperada: HTTP 201.",
+      "metaSortKey": 11,
+      "preRequestScript": "if (!insomnia.environment.get('token_admin')) throw new Error('Ejecuta primero Login admin en el entorno Local');\nif (!insomnia.environment.get('usuario_password_prueba')) throw new Error('Completa usuario_password_prueba antes de crear la cuenta');",
+      "afterResponseScript": "insomnia.test('HTTP 201', () => insomnia.expect(insomnia.response.code).to.eql(201));\nif (insomnia.response.code === 201) {\n  const data = insomnia.response.json();\n  insomnia.environment.set(\"usuario_id\", data.id);\n}\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    },
+    {
+      "_id": "__request_13__",
+      "_type": "request",
+      "parentId": "__folder_users__",
+      "name": "Consultar usuario por ID",
+      "method": "GET",
+      "url": "{{ _.base_url }}/usuarios/{{ _.usuario_id }}",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_admin }}"
+      },
+      "body": {},
+      "description": "\nRespuesta esperada: HTTP 200.",
+      "metaSortKey": 12,
+      "preRequestScript": "if (!insomnia.environment.get('token_admin')) throw new Error('Ejecuta primero Login admin en el entorno Local');\n",
+      "afterResponseScript": "insomnia.test('HTTP 200', () => insomnia.expect(insomnia.response.code).to.eql(200));\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    },
+    {
+      "_id": "__request_14__",
+      "_type": "request",
+      "parentId": "__folder_users__",
+      "name": "Editar usuario de prueba",
+      "method": "PUT",
+      "url": "{{ _.base_url }}/usuarios/{{ _.usuario_id }}",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_admin }}"
+      },
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nombres\": \"Usuario editado\",\n  \"apellidos\": \"Prueba Insomnia\",\n  \"email\": \"{{ _.usuario_email_prueba }}\",\n  \"password\": null,\n  \"rol\": \"rol_solicitante\",\n  \"areaId\": {{ _.area_id }}\n}"
+      },
+      "description": "Contraseña null o vacía conserva la actual. areaId null elimina el área. El estado se cambia mediante PATCH separado.\nRespuesta esperada: HTTP 200.",
+      "metaSortKey": 13,
+      "preRequestScript": "if (!insomnia.environment.get('token_admin')) throw new Error('Ejecuta primero Login admin en el entorno Local');\n",
+      "afterResponseScript": "insomnia.test('HTTP 200', () => insomnia.expect(insomnia.response.code).to.eql(200));\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    },
+    {
+      "_id": "__request_15__",
+      "_type": "request",
+      "parentId": "__folder_users__",
+      "name": "Cambiar estado a inactivo",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/usuarios/{{ _.usuario_id }}/estado",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_admin }}"
+      },
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"estado\": \"inactivo\"\n}"
+      },
+      "description": "Solo acepta activo/inactivo. No permite desactivar la cuenta autenticada.\nRespuesta esperada: HTTP 200.",
+      "metaSortKey": 14,
+      "preRequestScript": "if (!insomnia.environment.get('token_admin')) throw new Error('Ejecuta primero Login admin en el entorno Local');\n",
+      "afterResponseScript": "insomnia.test('HTTP 200', () => insomnia.expect(insomnia.response.code).to.eql(200));\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    },
+    {
+      "_id": "__request_16__",
+      "_type": "request",
+      "parentId": "__folder_users__",
+      "name": "Cambiar estado a activo",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/usuarios/{{ _.usuario_id }}/estado",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_admin }}"
+      },
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"estado\": \"activo\"\n}"
+      },
+      "description": "Solo acepta activo/inactivo. No permite desactivar la cuenta autenticada.\nRespuesta esperada: HTTP 200.",
+      "metaSortKey": 15,
+      "preRequestScript": "if (!insomnia.environment.get('token_admin')) throw new Error('Ejecuta primero Login admin en el entorno Local');\n",
+      "afterResponseScript": "insomnia.test('HTTP 200', () => insomnia.expect(insomnia.response.code).to.eql(200));\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    },
+    {
+      "_id": "__folder_tickets__",
+      "_type": "request_group",
+      "parentId": "__WORKSPACE_ID__",
+      "name": "04 · Tickets",
+      "description": "",
+      "environment": {},
+      "metaSortKey": 22
+    },
+    {
+      "_id": "__request_17__",
+      "_type": "request",
+      "parentId": "__folder_tickets__",
+      "name": "Crear ticket · solicitante",
+      "method": "POST",
+      "url": "{{ _.base_url }}/tickets",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_solicitante }}"
+      },
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"asunto\": \"Prueba de conexión desde Insomnia\",\n  \"descripcion\": \"Ticket ficticio para probar el flujo completo de atención.\",\n  \"categoriaId\": {{ _.categoria_id }}\n}"
+      },
+      "description": "La identidad proviene del token. La prioridad la sugiere el backend y la asignación depende de ajustes.\nRespuesta esperada: HTTP 201.",
+      "metaSortKey": 16,
+      "preRequestScript": "if (!insomnia.environment.get('token_solicitante')) throw new Error('Ejecuta primero Login solicitante en el entorno Local');\n",
+      "afterResponseScript": "insomnia.test('HTTP 201', () => insomnia.expect(insomnia.response.code).to.eql(201));\nif (insomnia.response.code === 201) {\n  const data = insomnia.response.json();\n  insomnia.environment.set(\"ticket_id\", data.id);\n}\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    },
+    {
+      "_id": "__request_18__",
+      "_type": "request",
+      "parentId": "__folder_tickets__",
+      "name": "Listar tickets · solicitante",
+      "method": "GET",
+      "url": "{{ _.base_url }}/tickets",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_solicitante }}"
+      },
+      "body": {},
+      "description": "Solicitante: propios. Técnico: asignados o propios. Administrador y jefatura: todos.\nRespuesta esperada: HTTP 200.",
+      "metaSortKey": 17,
+      "preRequestScript": "if (!insomnia.environment.get('token_solicitante')) throw new Error('Ejecuta primero Login solicitante en el entorno Local');\n",
+      "afterResponseScript": "insomnia.test('HTTP 200', () => insomnia.expect(insomnia.response.code).to.eql(200));\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    },
+    {
+      "_id": "__request_19__",
+      "_type": "request",
+      "parentId": "__folder_tickets__",
+      "name": "Listar tickets · tecnico",
+      "method": "GET",
+      "url": "{{ _.base_url }}/tickets",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_tecnico }}"
+      },
+      "body": {},
+      "description": "Solicitante: propios. Técnico: asignados o propios. Administrador y jefatura: todos.\nRespuesta esperada: HTTP 200.",
+      "metaSortKey": 18,
+      "preRequestScript": "if (!insomnia.environment.get('token_tecnico')) throw new Error('Ejecuta primero Login tecnico en el entorno Local');\n",
+      "afterResponseScript": "insomnia.test('HTTP 200', () => insomnia.expect(insomnia.response.code).to.eql(200));\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    },
+    {
+      "_id": "__request_20__",
+      "_type": "request",
+      "parentId": "__folder_tickets__",
+      "name": "Listar tickets · jefatura",
+      "method": "GET",
+      "url": "{{ _.base_url }}/tickets",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_jefatura }}"
+      },
+      "body": {},
+      "description": "Solicitante: propios. Técnico: asignados o propios. Administrador y jefatura: todos.\nRespuesta esperada: HTTP 200.",
+      "metaSortKey": 19,
+      "preRequestScript": "if (!insomnia.environment.get('token_jefatura')) throw new Error('Ejecuta primero Login jefatura en el entorno Local');\n",
+      "afterResponseScript": "insomnia.test('HTTP 200', () => insomnia.expect(insomnia.response.code).to.eql(200));\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    },
+    {
+      "_id": "__request_21__",
+      "_type": "request",
+      "parentId": "__folder_tickets__",
+      "name": "Listar tickets · admin",
+      "method": "GET",
+      "url": "{{ _.base_url }}/tickets",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_admin }}"
+      },
+      "body": {},
+      "description": "Solicitante: propios. Técnico: asignados o propios. Administrador y jefatura: todos.\nRespuesta esperada: HTTP 200.",
+      "metaSortKey": 20,
+      "preRequestScript": "if (!insomnia.environment.get('token_admin')) throw new Error('Ejecuta primero Login admin en el entorno Local');\n",
+      "afterResponseScript": "insomnia.test('HTTP 200', () => insomnia.expect(insomnia.response.code).to.eql(200));\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    },
+    {
+      "_id": "__request_22__",
+      "_type": "request",
+      "parentId": "__folder_tickets__",
+      "name": "Consultar detalle · solicitante",
+      "method": "GET",
+      "url": "{{ _.base_url }}/tickets/{{ _.ticket_id }}",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_solicitante }}"
+      },
+      "body": {},
+      "description": "\nRespuesta esperada: HTTP 200.",
+      "metaSortKey": 21,
+      "preRequestScript": "if (!insomnia.environment.get('token_solicitante')) throw new Error('Ejecuta primero Login solicitante en el entorno Local');\n",
+      "afterResponseScript": "insomnia.test('HTTP 200', () => insomnia.expect(insomnia.response.code).to.eql(200));\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    },
+    {
+      "_id": "__request_23__",
+      "_type": "request",
+      "parentId": "__folder_tickets__",
+      "name": "Asignar técnico · jefatura",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/tickets/{{ _.ticket_id }}/asignar",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_jefatura }}"
+      },
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"tecnicoId\": {{ _.tecnico_id }}\n}"
+      },
+      "description": "Debe ser un técnico activo. Usa el mismo ID del login técnico para probar la atención.\nRespuesta esperada: HTTP 200.",
+      "metaSortKey": 22,
+      "preRequestScript": "if (!insomnia.environment.get('token_jefatura')) throw new Error('Ejecuta primero Login jefatura en el entorno Local');\n",
+      "afterResponseScript": "insomnia.test('HTTP 200', () => insomnia.expect(insomnia.response.code).to.eql(200));\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    },
+    {
+      "_id": "__request_24__",
+      "_type": "request",
+      "parentId": "__folder_tickets__",
+      "name": "Cambiar prioridad · admin",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/tickets/{{ _.ticket_id }}/prioridad",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_admin }}"
+      },
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"prioridadId\": {{ _.prioridad_id }}\n}"
+      },
+      "description": "\nRespuesta esperada: HTTP 200.",
+      "metaSortKey": 23,
+      "preRequestScript": "if (!insomnia.environment.get('token_admin')) throw new Error('Ejecuta primero Login admin en el entorno Local');\n",
+      "afterResponseScript": "insomnia.test('HTTP 200', () => insomnia.expect(insomnia.response.code).to.eql(200));\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    },
+    {
+      "_id": "__request_25__",
+      "_type": "request",
+      "parentId": "__folder_tickets__",
+      "name": "Cambiar estado · técnico",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/tickets/{{ _.ticket_id }}/estado",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_tecnico }}"
+      },
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"estadoId\": {{ _.estado_id }}\n}"
+      },
+      "description": "Primero en_progreso desde abierto/en_espera; luego resuelto desde en_progreso. Selecciona el ID en el catálogo de estados.\nRespuesta esperada: HTTP 200.",
+      "metaSortKey": 24,
+      "preRequestScript": "if (!insomnia.environment.get('token_tecnico')) throw new Error('Ejecuta primero Login tecnico en el entorno Local');\n",
+      "afterResponseScript": "insomnia.test('HTTP 200', () => insomnia.expect(insomnia.response.code).to.eql(200));\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    },
+    {
+      "_id": "__request_26__",
+      "_type": "request",
+      "parentId": "__folder_tickets__",
+      "name": "Cambiar estado · jefatura",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/tickets/{{ _.ticket_id }}/estado",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_jefatura }}"
+      },
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"estadoId\": {{ _.estado_id }}\n}"
+      },
+      "description": "Puede cerrar o reabrir. Configura estado_id con el catálogo de estados.\nRespuesta esperada: HTTP 200.",
+      "metaSortKey": 25,
+      "preRequestScript": "if (!insomnia.environment.get('token_jefatura')) throw new Error('Ejecuta primero Login jefatura en el entorno Local');\n",
+      "afterResponseScript": "insomnia.test('HTTP 200', () => insomnia.expect(insomnia.response.code).to.eql(200));\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    },
+    {
+      "_id": "__folder_comments__",
+      "_type": "request_group",
+      "parentId": "__WORKSPACE_ID__",
+      "name": "05 · Comentarios",
+      "description": "",
+      "environment": {},
+      "metaSortKey": 33
+    },
+    {
+      "_id": "__request_27__",
+      "_type": "request",
+      "parentId": "__folder_comments__",
+      "name": "Comentar · solicitante",
+      "method": "POST",
+      "url": "{{ _.base_url }}/tickets/{{ _.ticket_id }}/comentarios",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_solicitante }}"
+      },
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"contenido\": \"Mensaje de prueba enviado como solicitante\"\n}"
+      },
+      "description": "Máximo 2000 caracteres. El autor se obtiene del token, nunca de un ID enviado en el cuerpo.\nRespuesta esperada: HTTP 201.",
+      "metaSortKey": 26,
+      "preRequestScript": "if (!insomnia.environment.get('token_solicitante')) throw new Error('Ejecuta primero Login solicitante en el entorno Local');\n",
+      "afterResponseScript": "insomnia.test('HTTP 201', () => insomnia.expect(insomnia.response.code).to.eql(201));\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    },
+    {
+      "_id": "__request_28__",
+      "_type": "request",
+      "parentId": "__folder_comments__",
+      "name": "Comentar · admin",
+      "method": "POST",
+      "url": "{{ _.base_url }}/tickets/{{ _.ticket_id }}/comentarios",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_admin }}"
+      },
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"contenido\": \"Mensaje de prueba enviado como admin\"\n}"
+      },
+      "description": "Máximo 2000 caracteres. El autor se obtiene del token, nunca de un ID enviado en el cuerpo.\nRespuesta esperada: HTTP 201.",
+      "metaSortKey": 27,
+      "preRequestScript": "if (!insomnia.environment.get('token_admin')) throw new Error('Ejecuta primero Login admin en el entorno Local');\n",
+      "afterResponseScript": "insomnia.test('HTTP 201', () => insomnia.expect(insomnia.response.code).to.eql(201));\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    },
+    {
+      "_id": "__request_29__",
+      "_type": "request",
+      "parentId": "__folder_comments__",
+      "name": "Comentar · tecnico",
+      "method": "POST",
+      "url": "{{ _.base_url }}/tickets/{{ _.ticket_id }}/comentarios",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_tecnico }}"
+      },
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"contenido\": \"Mensaje de prueba enviado como tecnico\"\n}"
+      },
+      "description": "Máximo 2000 caracteres. El autor se obtiene del token, nunca de un ID enviado en el cuerpo.\nRespuesta esperada: HTTP 201.",
+      "metaSortKey": 28,
+      "preRequestScript": "if (!insomnia.environment.get('token_tecnico')) throw new Error('Ejecuta primero Login tecnico en el entorno Local');\n",
+      "afterResponseScript": "insomnia.test('HTTP 201', () => insomnia.expect(insomnia.response.code).to.eql(201));\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    },
+    {
+      "_id": "__request_30__",
+      "_type": "request",
+      "parentId": "__folder_comments__",
+      "name": "Consultar seguimiento",
+      "method": "GET",
+      "url": "{{ _.base_url }}/tickets/{{ _.ticket_id }}/comentarios",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_solicitante }}"
+      },
+      "body": {},
+      "description": "Lista con id, contenido, autor y fechaCreacion.\nRespuesta esperada: HTTP 200.",
+      "metaSortKey": 29,
+      "preRequestScript": "if (!insomnia.environment.get('token_solicitante')) throw new Error('Ejecuta primero Login solicitante en el entorno Local');\n",
+      "afterResponseScript": "insomnia.test('HTTP 200', () => insomnia.expect(insomnia.response.code).to.eql(200));\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    },
+    {
+      "_id": "__folder_notifications__",
+      "_type": "request_group",
+      "parentId": "__WORKSPACE_ID__",
+      "name": "06 · Notificaciones",
+      "description": "",
+      "environment": {},
+      "metaSortKey": 38
+    },
+    {
+      "_id": "__request_31__",
+      "_type": "request",
+      "parentId": "__folder_notifications__",
+      "name": "Mi bandeja · solicitante",
+      "method": "GET",
+      "url": "{{ _.base_url }}/notificaciones",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_solicitante }}"
+      },
+      "body": {},
+      "description": "Devuelve items (últimas 50) y noLeidas (total pendiente). Solo de la cuenta autenticada.\nRespuesta esperada: HTTP 200.",
+      "metaSortKey": 30,
+      "preRequestScript": "if (!insomnia.environment.get('token_solicitante')) throw new Error('Ejecuta primero Login solicitante en el entorno Local');\n",
+      "afterResponseScript": "insomnia.test('HTTP 200', () => insomnia.expect(insomnia.response.code).to.eql(200));\nif (insomnia.response.code === 200) {\n  const data = insomnia.response.json();\n  insomnia.environment.set(\"notificacion_id\", data.items[0]?.id || 0);\n}\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    },
+    {
+      "_id": "__request_32__",
+      "_type": "request",
+      "parentId": "__folder_notifications__",
+      "name": "Marcar una como leída",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/notificaciones/{{ _.notificacion_id }}/leida",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_solicitante }}"
+      },
+      "body": {},
+      "description": "\nRespuesta esperada: HTTP 200.",
+      "metaSortKey": 31,
+      "preRequestScript": "if (!insomnia.environment.get('token_solicitante')) throw new Error('Ejecuta primero Login solicitante en el entorno Local');\n",
+      "afterResponseScript": "insomnia.test('HTTP 200', () => insomnia.expect(insomnia.response.code).to.eql(200));\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    },
+    {
+      "_id": "__request_33__",
+      "_type": "request",
+      "parentId": "__folder_notifications__",
+      "name": "Marcar todas como leídas",
+      "method": "POST",
+      "url": "{{ _.base_url }}/notificaciones/leer-todas",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_solicitante }}"
+      },
+      "body": {},
+      "description": "\nRespuesta esperada: HTTP 200.",
+      "metaSortKey": 32,
+      "preRequestScript": "if (!insomnia.environment.get('token_solicitante')) throw new Error('Ejecuta primero Login solicitante en el entorno Local');\n",
+      "afterResponseScript": "insomnia.test('HTTP 200', () => insomnia.expect(insomnia.response.code).to.eql(200));\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    },
+    {
+      "_id": "__folder_settings__",
+      "_type": "request_group",
+      "parentId": "__WORKSPACE_ID__",
+      "name": "07 · Configuración",
+      "description": "",
+      "environment": {},
+      "metaSortKey": 42
+    },
+    {
+      "_id": "__request_34__",
+      "_type": "request",
+      "parentId": "__folder_settings__",
+      "name": "Consultar ajustes",
+      "method": "GET",
+      "url": "{{ _.base_url }}/ajustes",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_admin }}"
+      },
+      "body": {},
+      "description": "\nRespuesta esperada: HTTP 200.",
+      "metaSortKey": 33,
+      "preRequestScript": "if (!insomnia.environment.get('token_admin')) throw new Error('Ejecuta primero Login admin en el entorno Local');\n",
+      "afterResponseScript": "insomnia.test('HTTP 200', () => insomnia.expect(insomnia.response.code).to.eql(200));\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    },
+    {
+      "_id": "__request_35__",
+      "_type": "request",
+      "parentId": "__folder_settings__",
+      "name": "Actualizar asignación automática",
+      "method": "PUT",
+      "url": "{{ _.base_url }}/ajustes",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_admin }}"
+      },
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"asignacionAutomatica\": true\n}"
+      },
+      "description": "Solo ADMIN. Guarda la preferencia en PostgreSQL. Afecta tickets nuevos.\nRespuesta esperada: HTTP 200.",
+      "metaSortKey": 34,
+      "preRequestScript": "if (!insomnia.environment.get('token_admin')) throw new Error('Ejecuta primero Login admin en el entorno Local');\n",
+      "afterResponseScript": "insomnia.test('HTTP 200', () => insomnia.expect(insomnia.response.code).to.eql(200));\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    },
+    {
+      "_id": "__folder_negative__",
+      "_type": "request_group",
+      "parentId": "__WORKSPACE_ID__",
+      "name": "08 · Comprobaciones de permisos",
+      "description": "Estas solicitudes deben fallar con el código indicado y no modificar datos.",
+      "environment": {},
+      "metaSortKey": 45
+    },
+    {
+      "_id": "__request_36__",
+      "_type": "request",
+      "parentId": "__folder_negative__",
+      "name": "Sin token → 401",
+      "method": "GET",
+      "url": "{{ _.base_url }}/tickets",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "body": {},
+      "description": "\nRespuesta esperada: HTTP 401.",
+      "metaSortKey": 35,
+      "preRequestScript": "",
+      "afterResponseScript": "insomnia.test('HTTP 401', () => insomnia.expect(insomnia.response.code).to.eql(401));\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    },
+    {
+      "_id": "__request_37__",
+      "_type": "request",
+      "parentId": "__folder_negative__",
+      "name": "Solicitante consulta usuarios → 403",
+      "method": "GET",
+      "url": "{{ _.base_url }}/usuarios",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_solicitante }}"
+      },
+      "body": {},
+      "description": "\nRespuesta esperada: HTTP 403.",
+      "metaSortKey": 36,
+      "preRequestScript": "if (!insomnia.environment.get('token_solicitante')) throw new Error('Ejecuta primero Login solicitante en el entorno Local');\n",
+      "afterResponseScript": "insomnia.test('HTTP 403', () => insomnia.expect(insomnia.response.code).to.eql(403));\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    },
+    {
+      "_id": "__request_38__",
+      "_type": "request",
+      "parentId": "__folder_negative__",
+      "name": "Registro público bloqueado → 401",
+      "method": "POST",
+      "url": "{{ _.base_url }}/auth/registro",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nombres\": \"Usuario\",\n  \"apellidos\": \"Prueba Insomnia\",\n  \"email\": \"{{ _.usuario_email_prueba }}\",\n  \"password\": \"{{ _.usuario_password_prueba }}\",\n  \"rol\": \"rol_solicitante\",\n  \"areaId\": {{ _.area_id }}\n}"
+      },
+      "description": "\nRespuesta esperada: HTTP 401.",
+      "metaSortKey": 37,
+      "preRequestScript": "",
+      "afterResponseScript": "insomnia.test('HTTP 401', () => insomnia.expect(insomnia.response.code).to.eql(401));\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    },
+    {
+      "_id": "__request_39__",
+      "_type": "request",
+      "parentId": "__folder_negative__",
+      "name": "Estado inválido → 400",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/usuarios/{{ _.usuario_id }}/estado",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_admin }}"
+      },
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"estado\": \"bloqueado\"\n}"
+      },
+      "description": "\nRespuesta esperada: HTTP 400.",
+      "metaSortKey": 38,
+      "preRequestScript": "if (!insomnia.environment.get('token_admin')) throw new Error('Ejecuta primero Login admin en el entorno Local');\n",
+      "afterResponseScript": "insomnia.test('HTTP 400', () => insomnia.expect(insomnia.response.code).to.eql(400));\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    },
+    {
+      "_id": "__folder_delete__",
+      "_type": "request_group",
+      "parentId": "__WORKSPACE_ID__",
+      "name": "99 · Eliminación MANUAL",
+      "description": "Fuera del recorrido habitual. Configurar confirmar_eliminacion=true solo para eliminar la cuenta ficticia creada aquí.",
+      "environment": {},
+      "metaSortKey": 50
+    },
+    {
+      "_id": "__request_40__",
+      "_type": "request",
+      "parentId": "__folder_delete__",
+      "name": "ELIMINAR usuario de prueba",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/usuarios/{{ _.usuario_id }}",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_admin }}"
+      },
+      "body": {},
+      "description": "Sin relaciones: elimina. Con tickets/comentarios/historial/notificaciones: desactiva y conserva el historial. Ambos casos devuelven 204; GET posterior permite distinguirlos.\nRespuesta esperada: HTTP 204.",
+      "metaSortKey": 39,
+      "preRequestScript": "if (!insomnia.environment.get('token_admin')) throw new Error('Ejecuta primero Login admin en el entorno Local');\nif (insomnia.environment.get('confirmar_eliminacion') !== true) throw new Error('Eliminación deshabilitada. Revisa usuario_id y activa confirmar_eliminacion solo para la cuenta de prueba');",
+      "afterResponseScript": "insomnia.test('HTTP 204', () => insomnia.expect(insomnia.response.code).to.eql(204));\n",
+      "settingSendCookies": false,
+      "settingStoreCookies": false
+    }
+  ]
+}

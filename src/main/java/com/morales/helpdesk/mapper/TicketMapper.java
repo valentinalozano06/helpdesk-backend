@@ -1,7 +1,9 @@
 package com.morales.helpdesk.mapper;
 
+import com.morales.helpdesk.dto.ticket.AdjuntoResponse;
 import com.morales.helpdesk.dto.ticket.ComentarioResponse;
 import com.morales.helpdesk.dto.ticket.HistorialCambioResponse;
+import com.morales.helpdesk.model.Adjunto;
 import com.morales.helpdesk.model.HistorialCambio;
 import com.morales.helpdesk.dto.ticket.TicketResponse;
 import com.morales.helpdesk.model.Comentario;
@@ -46,7 +48,20 @@ public class TicketMapper {
                 c.getId(),
                 c.getContenido(),
                 c.getUsuario().getNombreCompleto(),
-                c.getFechaCreacion()
+                c.getFechaCreacion(),
+                c.getUsuario().getId(),
+                c.getUsuario().getRol().getNombre()
+        );
+    }
+
+    public AdjuntoResponse toResponse(Adjunto a) {
+        return new AdjuntoResponse(
+                a.getId(),
+                a.getNombreArchivo(),
+                a.getTipoMime(),
+                a.getTamano(),
+                a.getUsuario().getNombreCompleto(),
+                a.getFechaCreacion()
         );
     }
 }

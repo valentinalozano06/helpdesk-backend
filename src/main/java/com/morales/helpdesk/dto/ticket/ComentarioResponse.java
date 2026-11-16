@@ -6,6 +6,8 @@ public record ComentarioResponse(
         Long id,
         String contenido,
         String autor,
-        LocalDateTime fechaCreacion
+        LocalDateTime fechaCreacion,
+        Long autorId,
+        String rol
 ) {
 }

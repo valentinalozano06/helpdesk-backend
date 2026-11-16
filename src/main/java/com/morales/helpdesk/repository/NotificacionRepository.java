@@ -13,4 +13,5 @@ public interface NotificacionRepository extends JpaRepository<Notificacion, Long
     @org.springframework.data.jpa.repository.Query("update Notificacion n set n.leida=true where n.usuario.id=:usuarioId and n.leida=false")
     int leerTodas(@org.springframework.data.repository.query.Param("usuarioId") Long usuarioId);
     long countByUsuarioIdAndLeidaFalse(Long usuarioId);
+    void deleteByTicketId(Long ticketId);
 }

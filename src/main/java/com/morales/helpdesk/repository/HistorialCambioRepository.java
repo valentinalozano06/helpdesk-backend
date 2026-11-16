@@ -9,4 +9,6 @@ import java.util.List;
 public interface HistorialCambioRepository extends JpaRepository<HistorialCambio, Long> {
     @EntityGraph(attributePaths = "usuario")
     List<HistorialCambio> findByTicketIdOrderByFechaCambioDescIdDesc(Long ticketId);
+
+    void deleteByTicketId(Long ticketId);
 }

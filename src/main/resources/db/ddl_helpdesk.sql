@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS tickets (
 CREATE INDEX IF NOT EXISTS idx_tickets_solicitante ON tickets(solicitante_id);
 CREATE INDEX IF NOT EXISTS idx_tickets_asignado    ON tickets(asignado_a_id);
 
--- Comentarios, historial y notificaciones (dependen de tickets/usuarios)
+-- Comentarios, historial, notificaciones y evidencia adjunta (dependen de tickets/usuarios)
 
 CREATE TABLE IF NOT EXISTS comentarios (
     id             BIGSERIAL PRIMARY KEY,
@@ -102,3 +102,18 @@ CREATE TABLE IF NOT EXISTS notificaciones (
 );
 
 CREATE INDEX IF NOT EXISTS idx_notificaciones_usuario ON notificaciones(usuario_id);
+
+-- Evidencia adjunta por ticket (imagenes PNG/JPG o PDF hasta 10 MB cada uno)
+
+CREATE TABLE IF NOT EXISTS adjuntos (
+    id             BIGSERIAL PRIMARY KEY,
+    ticket_id      BIGINT       NOT NULL REFERENCES tickets(id),
+    usuario_id    BIGINT       NOT NULL REFERENCES usuarios(id),
+    nombre_archivo VARCHAR(255) NOT NULL,
+    tipo_mime      VARCHAR(100) NOT NULL,
+    tamano         BIGINT       NOT NULL,
+    ruta_archivo   VARCHAR(500) NOT NULL,
+    fecha_creacion TIMESTAMP    NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_adjuntos_ticket ON adjuntos(ticket_id);

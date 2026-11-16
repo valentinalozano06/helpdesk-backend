@@ -45,6 +45,14 @@ public class UsuarioController {
         return usuarioService.listarTodos().stream().map(usuarioMapper::toResponse).toList();
     }
 
+    @GetMapping("/me")
+    public UsuarioResponse propio(Authentication auth) {
+        if (auth.getPrincipal() instanceof CustomUserDetails usuario) {
+            return usuarioMapper.toResponse(usuarioService.obtenerPorId(usuario.getId()));
+        }
+        throw new BusinessException("No se pudo identificar la cuenta autenticada");
+    }
+
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'JEFATURA')")
     public UsuarioResponse obtener(@PathVariable Long id) {

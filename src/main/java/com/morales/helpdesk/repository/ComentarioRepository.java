@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface ComentarioRepository extends JpaRepository<Comentario, Long> {
     List<Comentario> findByTicketIdOrderByFechaCreacionAsc(Long ticketId);
+
+    void deleteByTicketId(Long ticketId);
 }

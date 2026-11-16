@@ -15,4 +15,5 @@ public interface TicketService {
     ComentarioResponse comentar(Long id, ComentarioRequest request, Authentication auth);
     List<ComentarioResponse> listarComentarios(Long id, Authentication auth);
     List<HistorialCambioResponse> listarHistorial(Long id, Authentication auth);
+    void eliminar(Long id, Authentication auth);
 }

@@ -70,6 +70,12 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.UNPROCESSABLE_ENTITY, "Los datos duplican un registro o tienen relaciones incompatibles", req, null);
     }
 
+    @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiErrorResponse> handleUploadSize(Exception ex, HttpServletRequest req) {
+        log.warn("Carga demasiado grande en {}: {}", req.getRequestURI(), ex.getMessage());
+        return build(HttpStatus.PAYLOAD_TOO_LARGE, "El archivo o el total de la carga supera el limite permitido", req, null);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleGeneric(Exception ex, HttpServletRequest req) {
         log.error("Error inesperado en {}", req.getRequestURI(), ex);

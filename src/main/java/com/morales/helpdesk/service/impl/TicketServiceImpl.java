@@ -19,8 +19,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Reglas de negocio del ciclo de vida del ticket (RF-03 a RF-09).
@@ -43,6 +47,8 @@ public class TicketServiceImpl implements TicketService {
     private final UsuarioRepository usuarioRepository;
     private final ComentarioRepository comentarioRepository;
     private final HistorialCambioRepository historialCambioRepository;
+    private final AdjuntoRepository adjuntoRepository;
+    private final NotificacionRepository notificacionRepository;
 
     private final ClasificadorTicketService clasificadorTicketService;
     private final NotificacionService notificacionService;
@@ -267,6 +273,44 @@ public class TicketServiceImpl implements TicketService {
                 .map(ticketMapper::toResponse).toList();
     }
 
+    @Override
+    @Transactional
+    public void eliminar(Long id, Authentication auth) {
+        Ticket ticket = buscarTicket(id);
+        Usuario actor = usuarioActual(auth);
+        validarEliminacion(ticket, actor);
+
+        String codigo = ticket.getCodigoUnico();
+        String asunto = ticket.getAsunto();
+        List<Adjunto> adjuntos = adjuntoRepository.findByTicketIdOrderByFechaCreacionAscIdAsc(id);
+        List<Path> archivos = adjuntos.stream().map(a -> Paths.get(a.getRutaArchivo())).toList();
+        List<Path> carpetas = archivos.stream().map(Path::getParent).filter(p -> p != null).distinct().toList();
+
+        notificacionRepository.deleteByTicketId(id);
+        historialCambioRepository.deleteByTicketId(id);
+        comentarioRepository.deleteByTicketId(id);
+        adjuntoRepository.deleteAll(adjuntos);
+        ticketRepository.flush();
+        ticketRepository.delete(ticket);
+        ticketRepository.flush();
+
+        org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
+            new org.springframework.transaction.support.TransactionSynchronization() {
+                @Override public void afterCommit() {
+                    for (Path archivo : archivos) {
+                        try { Files.deleteIfExists(archivo); }
+                        catch (java.io.IOException e) { log.error("No se pudo eliminar archivo de evidencia {} del ticket {}", archivo, codigo, e); }
+                    }
+                    for (Path carpeta : carpetas) {
+                        try { Files.deleteIfExists(carpeta); }
+                        catch (java.io.IOException ignored) { /* La carpeta puede contener otros archivos. */ }
+                    }
+                }
+            });
+
+        log.info("Ticket {} (\"{}\") eliminado definitivamente por {} ({})", codigo, asunto, actor.getEmail(), actor.getRol().getNombre());
+    }
+
     private void registrarHistorial(Ticket ticket, Usuario usuario, String campo, String valorAnterior, String valorNuevo) {
         historialCambioRepository.save(HistorialCambio.builder()
                 .ticket(ticket).usuario(usuario)
@@ -293,6 +337,15 @@ public class TicketServiceImpl implements TicketService {
         if (java.util.Set.of("rol_admin","rol_jefatura").contains(u.getRol().getNombre())) return;
         if ("rol_tecnico".equals(u.getRol().getNombre()) && t.getAsignadoA()!=null && t.getAsignadoA().getId().equals(u.getId())) return;
         throw new org.springframework.security.access.AccessDeniedException("No es el técnico asignado");
+    }
+    private void validarEliminacion(Ticket t, Usuario u) {
+        String rol = u.getRol().getNombre();
+        if (Set.of("rol_admin", "rol_jefatura").contains(rol)) return;
+        if ("rol_solicitante".equals(rol)
+                && t.getSolicitante().getId().equals(u.getId())
+                && "abierto".equals(t.getEstado().getNombre())) return;
+        throw new org.springframework.security.access.AccessDeniedException(
+                "Solo Admin/Jefatura o el solicitante dueño de un ticket abierto pueden eliminarlo");
     }
     private Usuario usuarioActual(Authentication auth) {
         Long id = ((CustomUserDetails) auth.getPrincipal()).getId();

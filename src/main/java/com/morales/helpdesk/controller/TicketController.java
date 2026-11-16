@@ -75,4 +75,11 @@ public class TicketController {
     public ResponseEntity<List<ComentarioResponse>> comentarios(@PathVariable Long id, Authentication auth) {
         return ResponseEntity.ok(ticketService.listarComentarios(id, auth));
     }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SOLICITANTE', 'ADMIN', 'JEFATURA')")
+    public ResponseEntity<Void> eliminar(@PathVariable Long id, Authentication auth) {
+        ticketService.eliminar(id, auth);
+        return ResponseEntity.noContent().build();
+    }
 }

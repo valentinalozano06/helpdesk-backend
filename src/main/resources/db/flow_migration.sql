@@ -5,3 +5,14 @@ ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS ultima_asignacion TIMESTAMP;
 ALTER TABLE notificaciones ADD COLUMN IF NOT EXISTS ticket_id BIGINT REFERENCES tickets(id) ON DELETE SET NULL;
 CREATE INDEX IF NOT EXISTS idx_notificaciones_pendientes ON notificaciones(usuario_id,leida,fecha_creacion DESC);
 CREATE TABLE IF NOT EXISTS ticket_correlativos (fecha DATE PRIMARY KEY, ultimo BIGINT NOT NULL);
+CREATE TABLE IF NOT EXISTS adjuntos (
+    id             BIGSERIAL PRIMARY KEY,
+    ticket_id      BIGINT       NOT NULL REFERENCES tickets(id),
+    usuario_id     BIGINT       NOT NULL REFERENCES usuarios(id),
+    nombre_archivo VARCHAR(255) NOT NULL,
+    tipo_mime      VARCHAR(100) NOT NULL,
+    tamano         BIGINT       NOT NULL,
+    ruta_archivo   VARCHAR(500) NOT NULL,
+    fecha_creacion TIMESTAMP    NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_adjuntos_ticket ON adjuntos(ticket_id);

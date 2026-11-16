@@ -4,6 +4,10 @@ server:
 spring:
   application:
     name: helpdesk-morales
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 55MB
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:helpdesk_morales}
     username: ${DB_USER:helpdesk_app}
@@ -35,6 +39,9 @@ spring:
             enable: true
 
 app:
+  uploads:
+    # Directorio del almacen de evidencia adjunta (se crean subcarpetas por ticket)
+    dir: ${UPLOAD_DIR:uploads}
   jwt:
     secret: ${JWT_SECRET:cambia-esta-clave-en-produccion-minimo-32-caracteres-largos}
     expiration-ms: ${JWT_EXPIRATION_MS:28800000} # 8 horas

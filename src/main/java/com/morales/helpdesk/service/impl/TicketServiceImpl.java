@@ -49,6 +49,8 @@ public class TicketServiceImpl implements TicketService {
     private final HistorialCambioRepository historialCambioRepository;
     private final AdjuntoRepository adjuntoRepository;
     private final NotificacionRepository notificacionRepository;
+    private final EscalamientoRepository escalamientoRepository;
+    private final EscalamientoEvidenciaRepository escalamientoEvidenciaRepository;
 
     private final ClasificadorTicketService clasificadorTicketService;
     private final NotificacionService notificacionService;
@@ -157,6 +159,10 @@ public class TicketServiceImpl implements TicketService {
                 .orElseThrow(() -> new ResourceNotFoundException("Estado no encontrado"));
 
         String anterior = ticket.getEstado().getNombre();
+        if (Set.of("requiere_revision", "no_resuelto").contains(nuevoEstado.getNombre()))
+            throw new BusinessException("Este estado solo puede establecerse mediante el flujo de escalamiento");
+        if ("requiere_revision".equals(anterior))
+            throw new BusinessException("La Jefatura debe decidir el escalamiento antes de cambiar el estado");
         if ("rol_tecnico".equals(actor.getRol().getNombre()) && !anterior.equals(nuevoEstado.getNombre())) {
             boolean iniciar = "en_progreso".equals(nuevoEstado.getNombre()) && java.util.Set.of("abierto","en_espera").contains(anterior);
             boolean resolver = "resuelto".equals(nuevoEstado.getNombre()) && "en_progreso".equals(anterior);
@@ -175,6 +181,27 @@ public class TicketServiceImpl implements TicketService {
         notificacionService.notificarEvento(ticket.getSolicitante(), "ticket_" + nuevoEstado.getNombre(),
                 "Tu ticket " + ticket.getCodigoUnico() + " cambio a estado: " + nuevoEstado.getNombre(), ticket.getId());
 
+        return ticketMapper.toResponse(ticket);
+    }
+
+    @Override
+    @Transactional
+    public TicketResponse actualizarCategoria(Long id, TicketActualizaCategoriaRequest request, Authentication auth) {
+        Ticket ticket = buscarTicket(id);
+        Usuario actor = usuarioActual(auth);
+        validarGestion(ticket, actor);
+        if ("rol_tecnico".equals(actor.getRol().getNombre()) &&
+                Set.of("cerrado", "no_resuelto").contains(ticket.getEstado().getNombre()))
+            throw new BusinessException("Un ticket finalizado debe ser reabierto por Jefatura antes de reclasificarlo");
+        Categoria nueva = categoriaRepository.findById(request.categoriaId())
+                .orElseThrow(() -> new ResourceNotFoundException("Categoria no encontrada"));
+        String anterior = ticket.getCategoria().getNombre();
+        if (anterior.equals(nueva.getNombre())) return ticketMapper.toResponse(ticket);
+        ticket.setCategoria(nueva);
+        ticketRepository.saveAndFlush(ticket);
+        registrarHistorial(ticket, actor, "categoria", anterior, nueva.getNombre());
+        notificacionService.notificarEvento(ticket.getSolicitante(), "ticket_categoria_actualizada",
+                "La categoria de tu ticket " + ticket.getCodigoUnico() + " fue actualizada", ticket.getId());
         return ticketMapper.toResponse(ticket);
     }
 
@@ -283,13 +310,19 @@ public class TicketServiceImpl implements TicketService {
         String codigo = ticket.getCodigoUnico();
         String asunto = ticket.getAsunto();
         List<Adjunto> adjuntos = adjuntoRepository.findByTicketIdOrderByFechaCreacionAscIdAsc(id);
-        List<Path> archivos = adjuntos.stream().map(a -> Paths.get(a.getRutaArchivo())).toList();
+        List<Path> archivos = new java.util.ArrayList<>(adjuntos.stream().map(a -> Paths.get(a.getRutaArchivo())).toList());
+        List<Escalamiento> escalamientos = escalamientoRepository.findByTicketIdOrderByFechaCreacionAscIdAsc(id);
+        List<EscalamientoEvidencia> evidenciasInternas = escalamientos.stream()
+                .flatMap(e -> escalamientoEvidenciaRepository.findByEscalamientoIdOrderByFechaCreacionAscIdAsc(e.getId()).stream()).toList();
+        archivos.addAll(evidenciasInternas.stream().map(e -> Paths.get(e.getRutaArchivo())).toList());
         List<Path> carpetas = archivos.stream().map(Path::getParent).filter(p -> p != null).distinct().toList();
 
         notificacionRepository.deleteByTicketId(id);
         historialCambioRepository.deleteByTicketId(id);
         comentarioRepository.deleteByTicketId(id);
         adjuntoRepository.deleteAll(adjuntos);
+        escalamientoEvidenciaRepository.deleteAll(evidenciasInternas);
+        escalamientoRepository.deleteAll(escalamientos);
         ticketRepository.flush();
         ticketRepository.delete(ticket);
         ticketRepository.flush();

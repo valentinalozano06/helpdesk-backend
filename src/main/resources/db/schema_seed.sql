@@ -25,6 +25,7 @@ INSERT INTO categorias (nombre, descripcion) VALUES
   ('Software', 'Sistemas, aplicativos y licencias'),
   ('Red',      'Internet, VLAN, VPN y conectividad'),
   ('Accesos',  'Usuarios, contrasenas y permisos')
+  ,('Por clasificar', 'La persona solicitante no sabe a que categoria corresponde')
 ON CONFLICT (nombre) DO NOTHING;
 
 INSERT INTO prioridades (nombre, nivel) VALUES
@@ -32,5 +33,6 @@ INSERT INTO prioridades (nombre, nivel) VALUES
 ON CONFLICT (nombre) DO NOTHING;
 
 INSERT INTO estados_ticket (nombre, orden) VALUES
-  ('abierto', 1), ('en_progreso', 2), ('en_espera', 3), ('resuelto', 4), ('cerrado', 5)
+  ('abierto', 1), ('en_progreso', 2), ('en_espera', 3), ('resuelto', 4), ('cerrado', 5),
+  ('requiere_revision', 6), ('no_resuelto', 7)
 ON CONFLICT (nombre) DO NOTHING;

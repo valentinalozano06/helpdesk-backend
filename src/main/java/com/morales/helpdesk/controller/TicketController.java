@@ -46,6 +46,13 @@ public class TicketController {
         return ResponseEntity.ok(ticketService.actualizarEstado(id, request, auth));
     }
 
+    @PatchMapping("/{id}/categoria")
+    @PreAuthorize("hasAnyRole('TECNICO', 'ADMIN', 'JEFATURA')")
+    public ResponseEntity<TicketResponse> actualizarCategoria(
+            @PathVariable Long id, @Valid @RequestBody TicketActualizaCategoriaRequest request, Authentication auth) {
+        return ResponseEntity.ok(ticketService.actualizarCategoria(id, request, auth));
+    }
+
     @PatchMapping("/{id}/prioridad")
     @PreAuthorize("hasAnyRole('ADMIN', 'JEFATURA')")
     public ResponseEntity<TicketResponse> actualizarPrioridad(

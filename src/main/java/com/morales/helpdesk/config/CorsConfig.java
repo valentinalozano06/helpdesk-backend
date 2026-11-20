@@ -18,8 +18,12 @@ public class CorsConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        var origins = new java.util.ArrayList<>(List.of(allowedOrigins.split(",")));
-        origins.add("https://*.trycloudflare.com");
+        var origins = java.util.Arrays.stream(allowedOrigins.split(","))
+                .map(String::trim)
+                .filter(origin -> !origin.isEmpty())
+                .toList();
+        // Accept exact origins and wildcard patterns (for example, temporary
+        // Cloudflare quick-tunnel subdomains) while keeping credentials enabled.
         configuration.setAllowedOriginPatterns(origins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));

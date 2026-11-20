@@ -10,6 +10,7 @@ public interface TicketService {
     TicketResponse obtenerPorId(Long id, Authentication auth);
     List<TicketResponse> listarParaUsuarioActual(Authentication auth);
     TicketResponse actualizarEstado(Long id, TicketActualizaEstadoRequest request, Authentication auth);
+    TicketResponse actualizarCategoria(Long id, TicketActualizaCategoriaRequest request, Authentication auth);
     TicketResponse actualizarPrioridad(Long id, TicketActualizaPrioridadRequest request, Authentication auth);
     TicketResponse asignar(Long id, TicketAsignaRequest request, Authentication auth);
     ComentarioResponse comentar(Long id, ComentarioRequest request, Authentication auth);

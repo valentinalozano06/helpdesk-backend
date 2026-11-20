@@ -15,6 +15,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -44,13 +45,20 @@ public class DatosInicialesRunner implements ApplicationRunner {
     private final PasswordEncoder passwordEncoder;
     private final JdbcTemplate jdbcTemplate;
 
+    @Value("${app.bootstrap.clean-demo:false}")
+    private boolean cleanDemo;
+
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
         if (PASSWORD_TEMPORAL == null || PASSWORD_TEMPORAL.isBlank()) {
             throw new IllegalStateException("Configura HELPDESK_LEGACY_BOOTSTRAP_PASSWORD para activar el bootstrap legacy");
         }
-        limpiarDatosDemoSiCorresponde();
+        if (cleanDemo) {
+            limpiarDatosDemoSiCorresponde();
+        } else {
+            log.info("Bootstrap de usuarios reales sin borrar datos existentes (app.bootstrap.clean-demo=false)");
+        }
         boolean forzarPasswordTemporal = passwordTemporalDebeAplicarse();
 
         asegurarUsuario("Jozef Aarón", "López Díaz", "jozefy67@gmail.com", PASSWORD_TEMPORAL, "rol_admin", "Tecnologias de la Informacion", forzarPasswordTemporal);
